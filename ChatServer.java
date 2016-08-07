@@ -24,13 +24,12 @@ public class ChatServer {
 	private static HashSet<String> names = new HashSet<String>();
 
 	/**
-	 * The set of all the print writers for all the clients. This set is kept so we can easily broadcast messages to the
-	 * clients.
+	 * The set of all the print writers for all the clients. Used to broadcast messages to all clients
 	 */
 	private static HashSet<PrintWriter> writers = new HashSet<PrintWriter>();
 
 	/**
-	 * The appplication main method, which just listens on a port and spawns handler threads.
+	 * The application main method.
 	 */
 	public static void main(String[] args) throws Exception {
 		System.out.println("The chat server is running on port: " + PORT);
@@ -45,7 +44,7 @@ public class ChatServer {
 	}
 
 	/**
-	 * A handler thread class. Handlers are spawned from the listening loop and are responsible for a dealing with a
+	 * A handler thread class. Handlers are responsible for dealing with a
 	 * single client and broadcasting its messages.
 	 */
 	private static class Handler extends Thread {
@@ -55,16 +54,16 @@ public class ChatServer {
 		private PrintWriter out;
 
 		/**
-		 * Constructs a handler thread, squirreling away the socket. All the interesting work is done in the run method.
+		 * Constructs a handler thread.
 		 */
 		public Handler(Socket socket) {
 			this.socket = socket;
 		}
 
 		/**
-		 * Services this thread's client by repeatedly requesting a screen name until a unique one has been submitted,
-		 * then acknowledges the name and registers the output stream for the client in a global set, then repeatedly
-		 * gets inputs and broadcasts them.
+		 * Main method who does the work
+		 * Check for unique client names when ok add client to output stream
+		 * handle messages to clients
 		 */
 		public void run() {
 			try {
@@ -76,9 +75,7 @@ public class ChatServer {
 				ArrayList<String> contactlist = new ArrayList<>();
 
 				// Request a name from this client. Keep requesting until
-				// a name is submitted that is not already used. Note that
-				// checking for the existence of a name and adding the name
-				// must be done while locking the set of names.
+				// a name is submitted that is not already used.
 				while (true) {
 					out.println("SUBMITNAME");
 					name = in.readLine();
@@ -128,7 +125,7 @@ public class ChatServer {
 			} catch (IOException e) {
 				System.out.println(e);
 			} finally {
-				// This client is going down! Remove its name and its print
+				// A client is leaving/going down! Remove its name and its print
 				// writer from the sets, and close its socket.
 				// Update status to inactive
 				if (name != null) {

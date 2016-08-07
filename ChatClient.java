@@ -32,8 +32,8 @@ public class ChatClient {
 
 	/**
 	 * Constructs the client by laying out the GUI and registering a listener with the textfield so that pressing Return
-	 * in the listener sends the textfield contents to the server. Note however that the textfield is initially NOT
-	 * editable, and only becomes editable AFTER the client receives the NAMEACCEPTED message from the server.
+	 * in the listener sends the textfield contents to the server.
+	 * Chat can first be used when a nameaccepted has been received from server.
 	 */
 	public ChatClient() {
 
@@ -102,7 +102,7 @@ public class ChatClient {
 		// Add Listeners
 		textField.addActionListener(new ActionListener() {
 			/**
-			 * < * Responds to pressing the enter key in the textfield by sending the contents of the text field to the
+			 * Listen for enter key used in textfield, send the contents of the text field to the
 			 * server. Then clear the text area in preparation for the next message.
 			 */
 			public void actionPerformed(ActionEvent e) {
@@ -114,6 +114,7 @@ public class ChatClient {
 
 	/**
 	 * Prompt for and return the address of the server.
+	 * Use localhost for demo version
 	 */
 	private String getServerAddress() {
 		return JOptionPane.showInputDialog(frame, "Enter IP Address of the Server: (localhost)",
@@ -160,7 +161,7 @@ public class ChatClient {
 	}
 
 	/**
-	 * Connects to the server then enters the processing loop.
+	 * Connect to the server and enter main loop.
 	 */
 	private void run() throws IOException {
 
@@ -169,6 +170,7 @@ public class ChatClient {
 		Socket socket = new Socket(serverAddress, 9001);
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new PrintWriter(socket.getOutputStream(), true);
+		// Use for contact list handling
 		List<String> contacts = new ArrayList<>();
 		String name = null;
 		// Process all messages from server, according to the protocol.
@@ -193,10 +195,12 @@ public class ChatClient {
 						}
 					}
 				}
+				// Init contactlist from server
 			} else if (line.startsWith("[CONTACTLIST")) {
 				List<String> contactsFromServer = Arrays.asList(line
 						.substring(line.indexOf("[") + 1, line.indexOf("]")).split("\\s*,\\s*"));
 				contacts = setContactList(contactsFromServer);
+				// Update user status in contactfield
 			} else if (line.startsWith("USERSTATUS")) {
 				// Dont update own window with own status
 				if (!line.substring(11, line.indexOf(":")).equalsIgnoreCase(frame.getTitle())) {
@@ -232,7 +236,7 @@ public class ChatClient {
 	}
 
 	/**
-	 * Runs the client as an application with a closeable frame.
+	 * Runs the client as an application, handle closing of window.
 	 */
 	public static void main(String[] args) throws Exception {
 		ChatClient client = new ChatClient();
